@@ -1,0 +1,45 @@
+name: SonarCloud PR Analysis
+
+on:
+  pull_request:
+    branches: [ main ]     # Run on any PR targeting main
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write      # allow PR decoration (comments/checks)
+
+jobs:
+  sonarcloud:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # full history improves PR analysis
+
+      # If your project needs a build (Java/Node/.NET/etc.), do it here.
+      # Example for Java (Temurin JDK 17) and Maven:
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Build (Maven)
+        run: mvn -B -ntp -DskipTests clean package
+
+      # SonarCloud scan (uses the SonarQube Scan Action; it targets SonarCloud)
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v7
+        with:
+          projectBaseDir: .
+          # Optional extra args if you don't use sonar-project.properties:
+          # args: >
+          #   -Dsonar.organization=<org>
+          #   -Dsonar.projectKey=<projectKey>
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          # SONAR_HOST_URL is not required for SonarCloud (defaults), but you can set:
+          # SONAR_HOST_URL: https://sonarcloud.io
