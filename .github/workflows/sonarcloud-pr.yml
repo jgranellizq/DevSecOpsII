@@ -28,7 +28,7 @@ jobs:
           java-version: '17'
 
       - name: Build (Maven)
-        run: mvn -B -ntp -DskipTests clean package
+        run: mvn -B -ntp clean package
 
       # SonarCloud scan (uses the SonarQube Scan Action; it targets SonarCloud)
       - name: SonarCloud Scan
