@@ -1,0 +1,1 @@
+docker build -t mi_app:1.0 .
