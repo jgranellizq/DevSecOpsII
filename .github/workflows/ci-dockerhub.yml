@@ -81,8 +81,6 @@ jobs:
           tags: |
             type=raw,value=latest
             type=sha
-            # Si haces push de tags (v1.2.3), añade también:
-            type=ref,event=tag
 
       - name: Build y push de la imagen a Docker Hub
         uses: docker/build-push-action@v5
@@ -91,11 +89,3 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
-      # (Opcional) Trivy sobre la imagen publicada
-      # - name: Trivy Image scan
-      #   uses: aquasecurity/trivy-action@0.20.0
-      #   with:
-      #     image-ref: docker.io/${{ vars.DOCKERHUB_USERNAME }}/mimicroservicio:latest
-      #     severity: CRITICAL,HIGH
-      #     # exit-code: 1
