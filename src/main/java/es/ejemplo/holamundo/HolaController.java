@@ -18,4 +18,10 @@ public class HolaController {
     public Map<String, String> health() {
         return Map.of("status", "UP");
     }
+
+    @GetMapping("/holaplus")
+    public Map<String, String> hola() {
+        return Map.of("mensaje", "Hola Mundo desde Spring Boot en Docker");
+    }
 }
+
