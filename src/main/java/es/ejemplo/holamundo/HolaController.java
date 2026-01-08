@@ -20,8 +20,9 @@ public class HolaController {
     }
 
     @GetMapping("/holaplus")
-    public Map<String, String> hola() {
+    public Map<String, String> holaplus() {
         return Map.of("mensaje", "Hola Mundo desde Spring Boot en Docker");
     }
 }
+
 
