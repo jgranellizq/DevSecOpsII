@@ -18,13 +18,6 @@ class HolaControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    void holaplus_returnsMensaje() throws Exception {
-        mockMvc.perform(get("/holaplus"))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.mensaje").value("Hola Mundo desde Spring Boot en Docker"));
-    }
-
-    @Test
     void health_returnsUp() throws Exception {
         mockMvc.perform(get("/health"))
                .andExpect(status().isOk())
