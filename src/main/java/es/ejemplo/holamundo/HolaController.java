@@ -24,16 +24,4 @@ public class HolaController {
         return Map.of("mensaje", "Hola de nuevo Mundo desde Spring Boot en Docker");
     }
 
-    
-// NEW: near-duplicate of holaplus()
-    @GetMapping("/hola-duplicado")
-    public Map<String, String> holaDuplicado() {
-        // Same logic, same tokens → duplication
-        return Map.of("mensaje", "Hola Mundo desde Spring Boot en Docker");
-    }
-
 }
-
-
-
-
