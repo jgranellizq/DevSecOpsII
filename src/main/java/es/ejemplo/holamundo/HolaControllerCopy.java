@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RestController
-public class HolaController {
+public class HolaControllerCopy {
 
     @GetMapping("/hola")
     public Map<String, String> hola() {
