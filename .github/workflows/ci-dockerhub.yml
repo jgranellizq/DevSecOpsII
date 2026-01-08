@@ -36,7 +36,7 @@ jobs:
         run: mvn -B -ntp clean verify
 
       # -------------------------
-      # Bloque 3 – Calidad (SonarCloud)
+      # Bloque 2 – Calidad (SonarCloud)
       # -------------------------
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v7
@@ -51,7 +51,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       # -------------------------
-      # Bloque 4 – Seguridad (Trivy)
+      # Bloque 3 – Seguridad (Trivy)
       # -------------------------
       - name: Escaneo de seguridad con Trivy (FS)
         uses: aquasecurity/trivy-action@0.20.0
@@ -61,7 +61,7 @@ jobs:
           #exit-code: 1  # Actívalo si quieres que falle el job ante vulnerabilidades
 
       # -------------------------
-      # Bloque 5 – Publicación en Docker Hub
+      # Bloque 4 – Publicación en Docker Hub
       # -------------------------
       - name: Login a Docker Hub
         uses: docker/login-action@v3
