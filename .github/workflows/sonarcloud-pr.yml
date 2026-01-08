@@ -36,6 +36,7 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v7
         with:
           projectBaseDir: .
+        env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       # ---- Fail the job if the Quality Gate fails (blocks merge when required) ----
