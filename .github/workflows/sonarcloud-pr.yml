@@ -20,8 +20,6 @@ jobs:
         with:
           fetch-depth: 0    # full history improves PR analysis
 
-      # If your project needs a build (Java/Node/.NET/etc.), do it here.
-      # Example for Java (Temurin JDK 17) and Maven:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
@@ -42,5 +40,10 @@ jobs:
           #   -Dsonar.projectKey=<projectKey>
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          # SONAR_HOST_URL is not required for SonarCloud (defaults), but you can set:
-          # SONAR_HOST_URL: https://sonarcloud.io
+          
+      # This step waits for the analysis and fails if the Quality Gate fails
+      - name: Check Quality Gate
+        uses: SonarSource/sonarqube-quality-gate-action@v1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
