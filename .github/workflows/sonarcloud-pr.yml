@@ -10,7 +10,8 @@ permissions:
   pull-requests: write      # allow PR decoration (comments/checks)
 
 jobs:
-  sonarcloud:
+  sonarcloud-quality:
+    name: SonarCloud Quality Gate
     runs-on: ubuntu-latest
 
     steps:
