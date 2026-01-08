@@ -2,8 +2,9 @@
 name: CI (Build, Tests, SonarCloud, Trivy, DockerHub)
 
 on:
-  push:
-    branches: [ "main" ]
+#  push:
+#    branches: [ "main" ]
+  workflow_dispatch:  # Solo manual
 
 permissions:
   contents: read
