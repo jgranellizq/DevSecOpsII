@@ -89,6 +89,13 @@ jobs:
       - name: Mostrar registry devuelto por login-ecr
         run: |
           echo "REGISTRY: ${{ steps.login-ecr.outputs.registry }}"
+      
+      - name: Docker build/tag/push (CLI, solo diagnóstico)
+        if: ${{ always() }}
+        run: |
+          docker build -t localimage:diag .
+          docker tag localimage:diag ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:diag-test
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:diag-test
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
