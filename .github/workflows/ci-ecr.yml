@@ -59,7 +59,7 @@ jobs:
         with:
           scan-type: fs
           severity: CRITICAL,HIGH
-          # exit-code: 1  # Activa si quieres fallar ante vulnerabilidades
+          # exit-code: 1  # Activar para fallar ante vulnerabilidades
 
       # -------------------------
       # Bloque 4 – Publicación en Amazon ECR
