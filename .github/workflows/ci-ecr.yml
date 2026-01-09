@@ -75,21 +75,6 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
       
-      - name: Diagnóstico identidad y región
-        run: |
-          echo "== get-caller-identity =="
-          aws sts get-caller-identity
-          echo "== región configurada =="
-          aws configure get region || true
-          echo "== describe repositorio =="
-          aws ecr describe-repositories \
-            --repository-names hipo-registry \
-            --region eu-west-3
-
-      - name: Mostrar registry devuelto por login-ecr
-        run: |
-          echo "REGISTRY: ${{ steps.login-ecr.outputs.registry }}"
-      
       - name: Docker build/tag/push (CLI, solo diagnóstico)
         if: ${{ always() }}
         run: |
@@ -106,16 +91,20 @@ jobs:
         with:
           images: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}
           tags: |
-            type=raw,value=ci-latest
-            
-      - name: Build & Push (debug)
+            type=raw,value=ci-latest            
+      
+      - name: Build (con carga en daemon)
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true
+          push: false
+          load: true
           provenance: false
           sbom: false
-          tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:ci-latest
-        env:
-          BUILDX_BUILDKIT_LOG: debug
+          tags: localimage:ci
+
+      - name: Push (CLI, estable)
+        run: |
+          docker tag localimage:ci ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:ci-latest
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:ci-latest
           
