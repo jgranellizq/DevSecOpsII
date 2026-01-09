@@ -5,7 +5,7 @@ on:
   workflow_dispatch:  # Solo manual
 
 env:
-  AWS_REGION: eu-west-3         # <-- Ajusta tu región
+  AWS_REGION: eu-west-3
   ECR_REPOSITORY: hipo-registry
 
 jobs:
