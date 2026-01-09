@@ -38,20 +38,20 @@ class HolaControllerTest {
                .andExpect(jsonPath("$.mensaje").value("Hola de nuevo Mundo desde Spring Boot en Docker"));
     }
     @Test
-    void holaplus_returnsMensaje() throws Exception {
-        mockMvc.perform(get("/holaplus"))
+    void holaplus2_returnsMensaje() throws Exception {
+        mockMvc.perform(get("/holaplus2"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.mensaje").value("Hola de nuevo Mundo desde Spring Boot en Docker"));
     }
     @Test
-    void holaplus_returnsMensaje() throws Exception {
-        mockMvc.perform(get("/holaplus"))
+    void holaplus3_returnsMensaje() throws Exception {
+        mockMvc.perform(get("/holaplus3"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.mensaje").value("Hola de nuevo Mundo desde Spring Boot en Docker"));
     }
     @Test
-    void holaplus_returnsMensaje() throws Exception {
-        mockMvc.perform(get("/holaplus"))
+    void holaplus4_returnsMensaje() throws Exception {
+        mockMvc.perform(get("/holaplus4"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.mensaje").value("Hola de nuevo Mundo desde Spring Boot en Docker"));
     }
