@@ -1,0 +1,172 @@
+
+name: Full CI/CD (Build, Tests, SonarCloud, Trivy, ECR Push, EKS Deploy)
+
+on:
+  workflow_dispatch:  # Solo manual
+
+env:
+  AWS_REGION: eu-west-3
+  ECR_REPOSITORY: hipo-registry
+  EKS_CLUSTER_NAME: hipo-kubernetes
+  K8S_NAMESPACE: Default
+
+jobs:
+  manual-ci-ecr:
+    runs-on: ubuntu-latest
+
+    steps:
+      # -------------------------
+      # Bloque 1 – Build & Test
+      # -------------------------
+      - name: Checkout del código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      # ---- Tests + Coverage (JaCoCo) ----
+      - name: Build + Tests con cobertura
+        run: mvn -B -ntp clean verify
+
+      # -------------------------
+      # Bloque 2 – Calidad (SonarCloud)
+      # -------------------------
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v7
+        with:
+          projectBaseDir: .
+          # Si prefieres, pasa args o usa sonar-project.properties
+          # args: >
+          #   -Dsonar.organization=tu-org
+          #   -Dsonar.projectKey=tu-projectKey
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Check Quality Gate
+        uses: SonarSource/sonarqube-quality-gate-action@v1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # -------------------------
+      # Bloque 3 – Seguridad (Trivy)
+      # -------------------------
+      - name: Escaneo de seguridad con Trivy (FS)
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          scan-type: fs
+          severity: CRITICAL,HIGH
+          # exit-code: 1  # Activar para fallar ante vulnerabilidades
+
+      # -------------------------
+      # Bloque 4 – Publicación en Amazon ECR
+      # -------------------------
+      - name: Configurar credenciales de AWS
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login a Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      
+      - name: Build (con carga en daemon)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          load: true
+          provenance: false
+          sbom: false
+          tags: localimage:ci
+
+      - name: Push (CLI)
+        run: |
+          docker tag localimage:ci ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:ci-latest
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:ci-latest
+          
+      # -------------------------
+      # Bloque 5 – Despliegue en EKS (kubectl)
+      # -------------------------
+      - name: Obtener contexto EKS
+        run: |
+          aws eks update-kubeconfig \
+            --name "${{ env.EKS_CLUSTER_NAME }}" \
+            --region "${{ env.AWS_REGION }}"
+
+      - name: Render de manifiestos con la imagen de ECR
+        shell: bash
+        env:
+          APP_NAME: mimicroservicio
+          K8S_NAMESPACE: ${{ env.K8S_NAMESPACE }}
+          IMAGE_URI: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:ci-latest
+        run: |
+          cat > k8s-deployment.yaml <<'YAML'
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: ${APP_NAME}
+            namespace: ${K8S_NAMESPACE}
+            labels:
+              app: ${APP_NAME}
+          spec:
+            replicas: 2
+            selector:
+              matchLabels:
+                app: ${APP_NAME}
+            template:
+              metadata:
+                labels:
+                  app: ${APP_NAME}
+              spec:
+                containers:
+                  - name: ${APP_NAME}
+                    image: ${IMAGE_URI}
+                    imagePullPolicy: IfNotPresent
+                    ports:
+                      - containerPort: 8080
+                    readinessProbe:
+                      httpGet: { path: /health, port: 8080 }
+                      initialDelaySeconds: 5
+                      periodSeconds: 10
+                    livenessProbe:
+                      httpGet: { path: /health, port: 8080 }
+                      initialDelaySeconds: 15
+                      periodSeconds: 20
+          YAML
+
+          cat > k8s-service.yaml <<'YAML'
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: ${APP_NAME}
+            namespace: ${K8S_NAMESPACE}
+            labels:
+              app: ${APP_NAME}
+          spec:
+            type: ClusterIP
+            selector:
+              app: ${APP_NAME}
+            ports:
+              - name: http
+                port: 80
+                targetPort: 8080
+          YAML
+
+          echo "Validando manifiestos (dry-run)..."
+          kubectl apply --dry-run=client -f k8s-deployment.yaml
+          kubectl apply --dry-run=client -f k8s-service.yaml
+
+      - name: Aplicar en EKS y verificar rollout
+        run: |
+          kubectl apply -f k8s-deployment.yaml
+          kubectl apply -f k8s-service.yaml
+          kubectl -n "${{ env.K8S_NAMESPACE }}" rollout status deploy/mimicroservicio --timeout=2m
+          kubectl -n "${{ env.K8S_NAMESPACE }}" get svc mimicroservicio -o wide
