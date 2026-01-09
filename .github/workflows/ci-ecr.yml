@@ -107,11 +107,15 @@ jobs:
           images: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}
           tags: |
             type=raw,value=ci-latest
-
-      - name: Build y Push a ECR
+            
+      - name: Build & Push (debug)
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
+          sbom: false
+          tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:ci-latest
+        env:
+          BUILDX_BUILDKIT_LOG: debug
+          
