@@ -75,24 +75,6 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
       
-      - name: Docker build/tag/push (CLI, solo diagnóstico)
-        if: ${{ always() }}
-        run: |
-          docker build -t localimage:diag .
-          docker tag localimage:diag ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:diag-test
-          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:diag-test
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}
-          tags: |
-            type=raw,value=ci-latest            
-      
       - name: Build (con carga en daemon)
         uses: docker/build-push-action@v5
         with:
@@ -103,7 +85,7 @@ jobs:
           sbom: false
           tags: localimage:ci
 
-      - name: Push (CLI, estable)
+      - name: Push (CLI)
         run: |
           docker tag localimage:ci ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:ci-latest
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:ci-latest
