@@ -19,9 +19,5 @@ public class HolaController {
         return Map.of("status", "UP");
     }
 
-    @GetMapping("/holaplus")
-    public Map<String, String> holaplus() {
-        return Map.of("mensaje", "Hola de nuevo Mundo desde Spring Boot en Docker");
-    }
-
 }
+
