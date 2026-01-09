@@ -23,23 +23,24 @@ public class HolaController {
     public Map<String, String> holaplus() {
         return Map.of("mensaje", "Hola de nuevo Mundo desde Spring Boot en Docker");
     }
-    @GetMapping("/holaplus")
+    @GetMapping("/holaplus2")
     public Map<String, String> holaplus() {
         return Map.of("mensaje", "Hola de nuevo Mundo desde Spring Boot en Docker");
     }
-    @GetMapping("/holaplus")
+    @GetMapping("/holaplus3")
     public Map<String, String> holaplus() {
         return Map.of("mensaje", "Hola de nuevo Mundo desde Spring Boot en Docker");
     }
-    @GetMapping("/holaplus")
+    @GetMapping("/holaplus4")
     public Map<String, String> holaplus() {
         return Map.of("mensaje", "Hola de nuevo Mundo desde Spring Boot en Docker");
     }
-    @GetMapping("/holaplus")
+    @GetMapping("/holaplus5")
     public Map<String, String> holaplus() {
         return Map.of("mensaje", "Hola de nuevo Mundo desde Spring Boot en Docker");
     }
 }
+
 
 
 
